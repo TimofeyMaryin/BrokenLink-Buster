@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -70,4 +71,11 @@ dependencies {
     implementation(libs.navigatoin)
     implementation(libs.okhttp)
     implementation(libs.lottie)
+
+    // Firebase
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.play.service.auth)
+    implementation(libs.play.service.drive)
+    implementation(libs.play.service.identify)
 }

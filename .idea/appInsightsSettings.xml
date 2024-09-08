@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.broken.link.buster" />
+                  <option name="mobileSdkAppId" value="1:886930288472:android:106f690a664f02e798bf2d" />
+                  <option name="projectId" value="brokenlink-buster" />
+                  <option name="projectNumber" value="886930288472" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
