@@ -150,10 +150,8 @@ class SplashActivity : ComponentActivity() {
                                 }
 
                                 TextButton(onClick = {
-                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER))
-
+                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER)).apply()
                                     val i = Intent(applicationContext, MainActivity::class.java)
-                                    i.putExtra("dev", true)
                                     startActivity(i)
                                 }) {
                                     Text(text = "Войти разработчик", color = Color.Blue)

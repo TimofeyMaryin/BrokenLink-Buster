@@ -1,5 +1,7 @@
 package com.broken.link.buster
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.broken.link.buster.data._const.SHARED_USER_STATUS_NAME
+import com.broken.link.buster.data._const.USER_STATUS_SHARED_NAME
+import com.broken.link.buster.data._const.UserStatusSignIn
+import com.broken.link.buster.data._const.getUserStatusSignInToInt
 import com.broken.link.buster.presentation.navigation.ApplicationNavigation
 import com.broken.link.buster.ui.theme.BrokenLinkBusterTheme
 import io.realm.kotlin.Realm
@@ -22,8 +28,11 @@ import io.realm.kotlin.Realm
 class MainActivity : ComponentActivity() {
 
     private lateinit var realm: Realm
+    private lateinit var pref: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pref = getSharedPreferences(SHARED_USER_STATUS_NAME, Context.MODE_PRIVATE)
+
         enableEdgeToEdge()
         setContent {
             BrokenLinkBusterTheme {
@@ -34,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     ApplicationNavigation(this)
 
 
-                    if (intent.getBooleanExtra("dev", false)) {
+                    if (pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER)) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
