@@ -39,6 +39,7 @@ play-service-auth = { group = "com.google.android.gms", name = "play-services-au
 play-service-identify = { group = "com.google.android.gms", name = "play-services-identity", version = "18.1.0" }
 play-service-drive = { group = "com.google.android.gms", name = "play-services-drive", version = "17.0.0" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.18.1" }
 
 realm = { group = "io.realm.kotlin", name = "library-base", version = "1.11.0" }
 

@@ -82,6 +82,9 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
 
+    // jsoup
+    implementation(libs.jsoup)
+
     // Realm
     api(libs.realm)
 }
