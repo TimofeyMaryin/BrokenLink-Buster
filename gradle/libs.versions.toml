@@ -12,6 +12,8 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.0.0"
 firebaseFirestore = "25.1.0"
 relam-kotlin-ver = "1.14.0"
+appcompat = "1.7.0"
+material = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +44,8 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 jsoup = { group = "org.jsoup", name = "jsoup", version = "1.18.1" }
 
 realm = { group = "io.realm.kotlin", name = "library-base", version = "1.11.0" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 
 [plugins]
@@ -49,5 +53,6 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 realm-kotlin = { id = "io.realm.kotlin", version.ref = "relam-kotlin-ver" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 
 

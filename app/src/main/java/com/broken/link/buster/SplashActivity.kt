@@ -99,7 +99,10 @@ class SplashActivity : ComponentActivity() {
                                 verticalArrangement = Arrangement.Bottom,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                TextButton(onClick = { /*TODO*/ }) {
+                                TextButton(onClick = {
+                                    val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
+                                    startActivity(i)
+                                }) {
                                     Text(text = "Войти как гость", color = Color.Blue)
                                 }
 

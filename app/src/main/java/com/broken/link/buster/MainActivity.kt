@@ -17,8 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.broken.link.buster.presentation.navigation.ApplicationNavigation
 import com.broken.link.buster.ui.theme.BrokenLinkBusterTheme
+import io.realm.kotlin.Realm
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var realm: Realm
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

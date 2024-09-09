@@ -3,4 +3,5 @@
     <string name="title_activity_splash">SplashActivity</string>
 
     <string name="default_web_view_client_id">886930288472-6p20vttsgs9k5ndr185qc6d3d1imfmjj.apps.googleusercontent.com</string>
+    <string name="title_activity_authentification_guest">AuthentificationGuestActivity</string>
 </resources>

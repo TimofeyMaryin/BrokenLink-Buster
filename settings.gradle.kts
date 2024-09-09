@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "BrokenLink Buster"
 include(":app")
- 
+include(":user")
