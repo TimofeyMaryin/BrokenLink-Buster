@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.realm.kotlin)
 }
 
 android {
@@ -78,4 +79,7 @@ dependencies {
     implementation(libs.play.service.auth)
     implementation(libs.play.service.drive)
     implementation(libs.play.service.identify)
+
+    // Realm
+    api(libs.realm)
 }
