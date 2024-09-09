@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.play.service.drive)
     implementation(libs.play.service.identify)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
 
     // jsoup
