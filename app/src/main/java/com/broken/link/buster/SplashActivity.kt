@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import com.broken.link.buster.data._const.TAG
 import com.broken.link.buster.data._const.USER_STATUS_SHARED_NAME
 import com.broken.link.buster.data._const.UserStatusSignIn
 import com.broken.link.buster.data._const.getUserStatusSignInToInt
+import com.broken.link.buster.data._const.webClientId
 import com.broken.link.buster.presentation.UI_element.GoogleButton
 import com.broken.link.buster.presentation.vms.UserClientViewModel
 import com.broken.link.buster.ui.theme.BrokenLinkBusterTheme
@@ -70,11 +72,9 @@ class SplashActivity : ComponentActivity() {
 
         auth = FirebaseAuth.getInstance()
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("886930288472-cenrat278g32fpgm3bjp9kee3dd1egh1.apps.googleusercontent.com")
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
-
-
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
@@ -87,9 +87,6 @@ class SplashActivity : ComponentActivity() {
 
             LaunchedEffect(key1 = Unit) {
                 Log.e(TAG, "onCreate: user is register ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
-
-
-
                 if (
                     pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.GUEST) ||
                     pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.GOOGLE) ||
@@ -105,77 +102,56 @@ class SplashActivity : ComponentActivity() {
                     val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
                     startActivity(i)
                 }
+
             }
 
-            val userViewModel by viewModels<UserClientViewModel>()
 
             BrokenLinkBusterTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
-                    if (userViewModel.isLoadAccount) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = "Добро пожаловать в ${getString(R.string.app_name)}")
-
-                                Spacer(modifier = Modifier.height(20.dp))
-
-                                Text(text = "Выберите один из возможных способов входа")
-
-                                GoogleButton {
-                                    signInWithGoogle()
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier.fillMaxSize(.9f),
-                                verticalArrangement = Arrangement.Bottom,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                TextButton(onClick = {
-                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.GUEST_NO_FILLING))
-                                    prefEdit.apply()
-
-                                    Log.e(TAG, "onCreate: pref.getInt(USER_STATUS_SHARED_NAME, -1) = ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
-
-
-                                    val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
-                                    startActivity(i)
-
-                                }) {
-                                    Text(text = "Войти как гость", color = Color.Blue)
-                                }
-
-                                TextButton(onClick = {
-                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER)).apply()
-                                    val i = Intent(applicationContext, MainActivity::class.java)
-                                    startActivity(i)
-                                }) {
-                                    Text(text = "Войти разработчик", color = Color.Blue)
-                                }
-                            }
-                        }
-
-                    } else {
-                        val infiniteTransition = rememberInfiniteTransition()
-                        val progress by infiniteTransition.animateFloat(
-                            initialValue = 0f,
-                            targetValue = 1f,
-                            animationSpec = InfiniteRepeatableSpec(
-                                animation = tween(400),
-                                repeatMode = RepeatMode.Restart
-                            ), label = ""
-                        )
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Text(text = "Подождите, идет загрузка аккаунта")
-                            CircularProgressIndicator(progress = { progress })
+                            Text(text = "Добро пожаловать в ${getString(R.string.app_name)}")
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Text(text = "Выберите один из возможных способов входа")
+
+                            GoogleButton {
+                                signInWithGoogle()
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier.fillMaxSize(.9f),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            TextButton(onClick = {
+                                prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.GUEST_NO_FILLING))
+                                prefEdit.apply()
+
+                                Log.e(TAG, "onCreate: pref.getInt(USER_STATUS_SHARED_NAME, -1) = ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
+
+
+                                val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
+                                startActivity(i)
+
+                            }) {
+                                Text(text = "Войти как гость", color = Color.Blue)
+                            }
+
+                            TextButton(onClick = {
+                                prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER)).apply()
+                                val i = Intent(applicationContext, MainActivity::class.java)
+                                startActivity(i)
+                            }) {
+                                Text(text = "Войти разработчик", color = Color.Blue)
+                            }
                         }
                     }
 
