@@ -1,6 +1,7 @@
 package com.broken.link.buster
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -38,6 +40,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.broken.link.buster.data._const.SHARED_USER_STATUS_NAME
+import com.broken.link.buster.data._const.TAG
+import com.broken.link.buster.data._const.USER_STATUS_SHARED_NAME
+import com.broken.link.buster.data._const.UserStatusSignIn
+import com.broken.link.buster.data._const.getUserStatusSignInToInt
 import com.broken.link.buster.presentation.UI_element.GoogleButton
 import com.broken.link.buster.presentation.vms.UserClientViewModel
 import com.broken.link.buster.ui.theme.BrokenLinkBusterTheme
@@ -55,6 +62,9 @@ class SplashActivity : ComponentActivity() {
 
     private var isErrorPopUp by mutableStateOf(false)
 
+    private lateinit var pref: SharedPreferences
+    private lateinit var prefEdit: SharedPreferences.Editor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,9 +78,35 @@ class SplashActivity : ComponentActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        pref = getSharedPreferences(SHARED_USER_STATUS_NAME, MODE_PRIVATE)
+        prefEdit = pref.edit()
+
 
         enableEdgeToEdge()
         setContent {
+
+            LaunchedEffect(key1 = Unit) {
+                Log.e(TAG, "onCreate: user is register ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
+
+
+
+                if (
+                    pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.GUEST) ||
+                    pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.GOOGLE) ||
+                    pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER)
+                ) {
+                    Log.e(TAG, "onCreate: user is register ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
+                    val i = Intent(applicationContext, MainActivity::class.java)
+                    startActivity(i)
+                }
+
+                if (pref.getInt(USER_STATUS_SHARED_NAME, -1) == getUserStatusSignInToInt(UserStatusSignIn.GUEST_NO_FILLING)) {
+                    Log.e(TAG, "onCreate: user register as guest but does not compleated fill")
+                    val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
+                    startActivity(i)
+                }
+            }
+
             val userViewModel by viewModels<UserClientViewModel>()
 
             BrokenLinkBusterTheme {
@@ -100,13 +136,22 @@ class SplashActivity : ComponentActivity() {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 TextButton(onClick = {
+                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.GUEST_NO_FILLING))
+                                    prefEdit.apply()
+
+                                    Log.e(TAG, "onCreate: pref.getInt(USER_STATUS_SHARED_NAME, -1) = ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
+
+
                                     val i = Intent(applicationContext, AuthentificationGuestActivity::class.java)
                                     startActivity(i)
+
                                 }) {
                                     Text(text = "Войти как гость", color = Color.Blue)
                                 }
 
                                 TextButton(onClick = {
+                                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.DEVELOPER))
+
                                     val i = Intent(applicationContext, MainActivity::class.java)
                                     i.putExtra("dev", true)
                                     startActivity(i)
@@ -195,12 +240,6 @@ class SplashActivity : ComponentActivity() {
             firebaseAuthWithGoogle(account)
         } catch (e: ApiException) {
             isErrorPopUp = true
-            Log.e("TAG", "signInLauncher: $e",)
-            Log.e("TAG", "signInLauncher: ${e.message}",)
-            Log.e("TAG", "signInLauncher: ${e.cause?.message}",)
-            Log.e("TAG", "signInLauncher: ${e.cause?.cause}",)
-            Log.e("TAG", "signInLauncher: ${e.cause?.stackTrace}",)
-            Log.e("TAG", "signInLauncher: ${e.suppressed}",)
         }
     }
 
@@ -210,8 +249,10 @@ class SplashActivity : ComponentActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    prefEdit.putInt(USER_STATUS_SHARED_NAME, getUserStatusSignInToInt(UserStatusSignIn.GOOGLE)).apply()
                     val user = auth.currentUser
-                    Log.e("TAG", "firebaseAuthWithGoogle: success ${user?.email}", )
+                    Log.e(TAG, "firebaseAuthWithGoogle: success ${user?.email}", )
+                    Log.e(TAG, "firebaseAuthWithGoogle: ${pref.getInt(USER_STATUS_SHARED_NAME, -1)}", )
                     val navIntent = Intent(this, MainActivity::class.java)
                     startActivity(navIntent)
                 } else {

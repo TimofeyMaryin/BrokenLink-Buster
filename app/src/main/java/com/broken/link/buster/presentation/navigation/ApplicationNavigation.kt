@@ -1,5 +1,6 @@
 package com.broken.link.buster.presentation.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,7 +10,7 @@ import com.broken.link.buster.presentation.fragment.SearchFragment
 import com.broken.link.buster.presentation.fragment.SettingsFragment
 
 @Composable
-fun ApplicationNavigation() {
+fun ApplicationNavigation(activity: ComponentActivity) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screen.SearchScreen.route) {
@@ -28,7 +29,7 @@ fun ApplicationNavigation() {
         this.composable(
             route = Screen.SettingsScreen.route
         ) {
-            SettingsFragment(navController = navController)
+            SettingsFragment(navController = navController, activity = activity)
         }
     }
 }

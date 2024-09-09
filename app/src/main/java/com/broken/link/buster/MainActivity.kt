@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
 
 
-                    ApplicationNavigation()
+                    ApplicationNavigation(this)
 
 
                     if (intent.getBooleanExtra("dev", false)) {
