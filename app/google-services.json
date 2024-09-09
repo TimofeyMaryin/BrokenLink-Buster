@@ -12,7 +12,20 @@
           "package_name": "com.broken.link.buster"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "886930288472-6p20vttsgs9k5ndr185qc6d3d1imfmjj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.broken.link.buster",
+            "certificate_hash": "e418567d09794a076c0b8661f964126da1e21dea"
+          }
+        },
+        {
+          "client_id": "886930288472-cenrat278g32fpgm3bjp9kee3dd1egh1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAspVGODzT3xsuoke31oj-8n1AkCmMem2M"
@@ -20,26 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:886930288472:android:ef09c6787921a7a898bf2d",
-        "android_client_info": {
-          "package_name": "com.ofreodsa.firebaseauthtry1"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAspVGODzT3xsuoke31oj-8n1AkCmMem2M"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "886930288472-cenrat278g32fpgm3bjp9kee3dd1egh1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

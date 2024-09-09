@@ -32,11 +32,14 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
 navigatoin = { group = "androidx.navigation", name = "navigation-compose", version = "2.7.7" }
 lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "6.5.2" }
+
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 play-service-auth = { group = "com.google.android.gms", name = "play-services-auth", version = "21.2.0" }
 play-service-identify = { group = "com.google.android.gms", name = "play-services-identity", version = "18.1.0" }
 play-service-drive = { group = "com.google.android.gms", name = "play-services-drive", version = "17.0.0" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+
 realm = { group = "io.realm.kotlin", name = "library-base", version = "1.11.0" }
 
 
