@@ -17,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.broken.link.buster.data.BrokenLinkModel
+import com.broken.link.buster.data._const.COLLECTION_FIELD
+import com.broken.link.buster.data._const.COLLECTION_PATH
 import com.broken.link.buster.data._const.SHARED_USER_STATUS_NAME
 import com.broken.link.buster.data._const.TAG
 import com.broken.link.buster.data._const.USER_GOOGLE_LINK_TO_DATA
@@ -92,11 +94,11 @@ class MainActivity : ComponentActivity() {
     ) {
         val userId = auth.currentUser?.uid ?: return
 
-        firestore.collection("link").document(userId)
+        firestore.collection(COLLECTION_PATH).document(userId)
             .get()
             .addOnSuccessListener {  documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    val links = documentSnapshot.get("links") as? List<String>
+                    val links = documentSnapshot.get(COLLECTION_FIELD) as? List<String>
 
                     if (links != null) {
                         onSuccess(links)
@@ -111,6 +113,18 @@ class MainActivity : ComponentActivity() {
             }
     }
 
+    fun removeAllUserLink(
+        onSuccess: () -> Unit,
+        onError: () -> Unit,
+    ) {
+        val userUI = auth.currentUser?.uid ?: return
+
+        firestore.collection(COLLECTION_PATH).document(userUI)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onError() }
+    }
+
 
     fun saveLink(
         url: String,
@@ -118,25 +132,40 @@ class MainActivity : ComponentActivity() {
         onError: () -> Unit,
     ) {
         val userId = auth.currentUser?.uid ?: return
-        val data = hashMapOf("link" to listOf(url))
+        val data = hashMapOf(COLLECTION_FIELD to listOf(url))
 
 
-        firestore.collection("link")
+        firestore.collection(COLLECTION_PATH)
             .get()
-            .addOnSuccessListener {
-                firestore.collection("link").document(userId)
-                    .update("links", FieldValue.arrayUnion(url))
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Links success add", Toast.LENGTH_SHORT).show()
-                        onSuccess()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Connit save link. Please try again.", Toast.LENGTH_SHORT).show()
-                        onError()
-                    }
+            .addOnSuccessListener { querySnap ->
+                if (querySnap.isEmpty) {
+                    firestore.collection(COLLECTION_PATH)
+                        .document(userId)
+                        .set(data)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Success Save data", Toast.LENGTH_SHORT).show()
+                            onSuccess()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Failed Save data", Toast.LENGTH_SHORT).show()
+                            onError()
+                        }
+                } else {
+
+                    firestore.collection(COLLECTION_PATH).document(userId)
+                        .update(COLLECTION_FIELD, FieldValue.arrayUnion(url))
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Links success add", Toast.LENGTH_SHORT).show()
+                            onSuccess()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Connit save link. Please try again.", Toast.LENGTH_SHORT).show()
+                            onError()
+                        }
+                }
             }
             .addOnFailureListener {
-                firestore.collection("link")
+                firestore.collection(COLLECTION_PATH)
                     .document(userId)
                     .set(data)
                     .addOnSuccessListener {
@@ -150,61 +179,6 @@ class MainActivity : ComponentActivity() {
 
             }
 
-    }
-
-
-    fun loadOfferForUser(
-        onSuccess: (MutableList<BrokenLinkModel>) -> Unit,
-        onError: (Exception) -> Unit,
-    ) {
-        firestore.collection("user")
-            .get()
-            .addOnSuccessListener { result ->
-                val offerList = mutableListOf<BrokenLinkModel>()
-
-                if (result != null) {
-                    for (document in result.documents) {
-                        val link = document.toObject(BrokenLinkModel::class.java)
-                        if (link != null) {
-                            offerList.add(link)
-                        }
-                    }
-
-                    // Используйте usersList для отображения данных или других операций
-                    for (user in offerList) {
-                        Log.d("Firestore", "link: ${user.link}, statusLink: ${user.statusLink}")
-                    }
-                }
-
-                onSuccess(offerList)
-            }
-            .addOnFailureListener { e ->
-                onError(e)
-            }
-
-    }
-
-    fun saveOfferForUser(
-        model: BrokenLinkModel,
-        onSuccess: () -> Unit,
-        onError: () -> Unit,
-    ) {
-        Log.e(TAG, "saveOfferForUser: user id = ${auth.currentUser?.uid}", )
-        val userId = auth.currentUser?.uid ?: return
-
-        Log.e(TAG, "saveOfferForUser: user id got", )
-        
-        firestore.collection("user").document(userId)
-            .update(USER_GOOGLE_LINK_TO_DATA, model)
-            .addOnSuccessListener {
-                Log.e(TAG, "saveOfferForUser: data success save", )
-                onSuccess()
-            }
-            .addOnFailureListener {
-                Log.e(TAG, "saveOfferForUser: data error save", )
-                onError()
-            }
-        Log.e(TAG, "saveOfferForUser: function done", )
     }
 
 
