@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.broken.link.buster.data.BrokenLinkModel
 import com.broken.link.buster.data._const.SHARED_USER_STATUS_NAME
+import com.broken.link.buster.data._const.TAG
 import com.broken.link.buster.data._const.USER_GOOGLE_LINK_TO_DATA
 import com.broken.link.buster.data._const.USER_STATUS_SHARED_NAME
 import com.broken.link.buster.data._const.UserStatusSignIn
@@ -28,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import io.realm.kotlin.Realm
@@ -83,18 +86,72 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun getUserLink(
+        onSuccess: (List<String>) -> Unit,
+        onError: () -> Unit,
+    ) {
+        val userId = auth.currentUser?.uid ?: return
 
-    fun saveOfferForUser(
-        model: BrokenLinkModel,
+        firestore.collection("link").document(userId)
+            .get()
+            .addOnSuccessListener {  documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val links = documentSnapshot.get("links") as? List<String>
+
+                    if (links != null) {
+                        onSuccess(links)
+                    } else {
+                        onError()
+                    }
+
+                }
+            }
+            .addOnFailureListener {
+                onError()
+            }
+    }
+
+
+    fun saveLink(
+        url: String,
         onSuccess: () -> Unit,
         onError: () -> Unit,
     ) {
         val userId = auth.currentUser?.uid ?: return
-        firestore.collection("user").document(userId)
-            .update(USER_GOOGLE_LINK_TO_DATA, model)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onError() }
+        val data = hashMapOf("link" to listOf(url))
+
+
+        firestore.collection("link")
+            .get()
+            .addOnSuccessListener {
+                firestore.collection("link").document(userId)
+                    .update("links", FieldValue.arrayUnion(url))
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Links success add", Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Connit save link. Please try again.", Toast.LENGTH_SHORT).show()
+                        onError()
+                    }
+            }
+            .addOnFailureListener {
+                firestore.collection("link")
+                    .document(userId)
+                    .set(data)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Success Save data", Toast.LENGTH_SHORT).show()
+                        onSuccess()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Failed Save data", Toast.LENGTH_SHORT).show()
+                        onError()
+                    }
+
+            }
+
     }
+
 
     fun loadOfferForUser(
         onSuccess: (MutableList<BrokenLinkModel>) -> Unit,
@@ -126,6 +183,30 @@ class MainActivity : ComponentActivity() {
             }
 
     }
+
+    fun saveOfferForUser(
+        model: BrokenLinkModel,
+        onSuccess: () -> Unit,
+        onError: () -> Unit,
+    ) {
+        Log.e(TAG, "saveOfferForUser: user id = ${auth.currentUser?.uid}", )
+        val userId = auth.currentUser?.uid ?: return
+
+        Log.e(TAG, "saveOfferForUser: user id got", )
+        
+        firestore.collection("user").document(userId)
+            .update(USER_GOOGLE_LINK_TO_DATA, model)
+            .addOnSuccessListener {
+                Log.e(TAG, "saveOfferForUser: data success save", )
+                onSuccess()
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "saveOfferForUser: data error save", )
+                onError()
+            }
+        Log.e(TAG, "saveOfferForUser: function done", )
+    }
+
 
 
 }
