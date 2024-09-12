@@ -88,6 +88,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    val getUserId = { auth.currentUser?.uid }
+
     fun getUserLink(
         onSuccess: (List<String>) -> Unit,
         onError: () -> Unit,
@@ -106,12 +108,48 @@ class MainActivity : ComponentActivity() {
                         onError()
                     }
 
+                } else {
+                    onError()
                 }
             }
             .addOnFailureListener {
                 onError()
             }
     }
+
+    fun removeLinkFromFirestore(
+        link: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val userDocRef = firestore.collection(COLLECTION_PATH).document(userId)
+
+        userDocRef
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                val links = documentSnapshot.get(COLLECTION_FIELD) as? MutableList<String>
+
+                links?.let {
+                    if (it.contains(link)) {
+                        it.remove(link)
+
+                        userDocRef
+                            .update(COLLECTION_FIELD, it)
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { onError("Cannot Update (1)") }
+                    } else {
+                        onError("link == null")
+                    }
+                }
+            }
+            .addOnFailureListener {
+                onError("addOnFailureListener")
+            }
+
+
+    }
+
 
     fun removeAllUserLink(
         onSuccess: () -> Unit,
@@ -123,6 +161,20 @@ class MainActivity : ComponentActivity() {
             .delete()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onError() }
+    }
+
+
+    fun createNewDataBase(
+        data: String,
+        onSuccess: () -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+
+        firestore.collection(COLLECTION_PATH)
+            .document(userId)
+            .set(hashMapOf(COLLECTION_FIELD to listOf(data)))
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener {  }
     }
 
 

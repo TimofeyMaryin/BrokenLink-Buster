@@ -1,6 +1,7 @@
 package com.broken.link.buster.presentation.fragment
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,21 +9,27 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -41,7 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.broken.link.buster.MainActivity
 import com.broken.link.buster.data._const.TAG
@@ -58,7 +68,11 @@ fun SearchFragment(
 
     var saveUserLinksTrigger by remember { mutableIntStateOf(0) }
     var showUserLinksTrigger by remember { mutableIntStateOf(0) }
-    var deleteUserLinkTrigger by remember { mutableIntStateOf(0) }
+    var removeUserDataBaseTrigger by remember { mutableIntStateOf(0) }
+    var createNewDataBaseTrigger by remember { mutableIntStateOf(0) }
+    var removeCurrentLinkTrigger by remember { mutableIntStateOf(0) }
+
+    var selectedItem by remember { mutableStateOf<String?>(null) }
 
     var isLoad by remember { mutableStateOf(false) }
 
@@ -72,10 +86,22 @@ fun SearchFragment(
         ), label = ""
     )
 
+    LaunchedEffect(key1 = createNewDataBaseTrigger) {
+        if (createNewDataBaseTrigger > 0) {
+            isLoad = true
+            activity.createNewDataBase(
+                data = userLink,
+                onSuccess = {
+                    showUserLinksTrigger++
+                    isLoad = false
+                }
+            )
+        }
+    }
+
 
     LaunchedEffect(key1 = Unit) {
         Log.e(TAG, "SearchFragment: Unit", )
-        // showUserLinksTrigger++
         isLoad = true
         activity.getUserLink(
             onSuccess = {
@@ -88,6 +114,26 @@ fun SearchFragment(
                 isLoad = false
             }
         )
+    }
+
+    LaunchedEffect(key1 = removeCurrentLinkTrigger)  {
+        if (removeCurrentLinkTrigger > 0) {
+            Log.e(TAG, "SearchFragment: deleteCurrentLinkTrigger", )
+
+            activity.removeLinkFromFirestore(
+                link = selectedItem!!,
+                onSuccess = {
+                    Log.e(TAG, "SearchFragment deleteCurrentLinkTrigger: success", )
+                    showUserLinksTrigger++
+                },
+                onError = {
+                    Log.e(TAG, "SearchFragment deleteCurrentLinkTrigger: error msg = $it", )
+                    showUserLinksTrigger++
+                }
+
+            )
+
+        }
     }
 
 
@@ -129,13 +175,14 @@ fun SearchFragment(
         }
     }
 
-    LaunchedEffect(key1 = deleteUserLinkTrigger) {
-        if (deleteUserLinkTrigger > 0) {
+    LaunchedEffect(key1 = removeUserDataBaseTrigger) {
+        if (removeUserDataBaseTrigger > 0) {
 
             Log.e(TAG, "SearchFragment: deleteUserLinkTrigger", )
             activity.removeAllUserLink(
                 onSuccess = {
                     showUserLinksTrigger++
+                    Log.e(TAG, "SearchFragment: delete user was success", )
                 },
                 onError = {
                     Log.e("TAG", "SearchFragment deleteUserLinkTrigger: error", )
@@ -146,6 +193,11 @@ fun SearchFragment(
 
     FragmentContainer(navController = navController) {
 
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize(.9f), contentAlignment = Alignment.BottomCenter) {
+                Text(text = activity.getUserId() ?: "empty")
+            }
+        }
         Column(
             modifier = Modifier.fillMaxSize(.9f),
         ) {
@@ -162,14 +214,18 @@ fun SearchFragment(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 IconButton(onClick = { saveUserLinksTrigger++ }) {
+                    Icon(imageVector = Icons.Default.Warning, contentDescription = null)
+                }
+
+                IconButton(onClick = { saveUserLinksTrigger++ }) {
                     Icon(imageVector = Icons.Default.Create, contentDescription = null)
                 }
 
                 IconButton(onClick = { showUserLinksTrigger++ }) {
-                    Icon(imageVector = Icons.Default.AccountBox, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                 }
 
-                IconButton(onClick = { deleteUserLinkTrigger++ }) {
+                IconButton(onClick = { removeUserDataBaseTrigger++ }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                 }
 
@@ -191,7 +247,33 @@ fun SearchFragment(
                                     .clip(MaterialTheme.shapes.medium)
                                     .background(Color.Magenta)
                                     .fillParentMaxWidth()
-                                    .height(50.dp),
+                                    .combinedClickable(
+                                        onClick = {
+                                            Toast
+                                                .makeText(
+                                                    activity,
+                                                    "Plain Click",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                        },
+                                        onLongClick = {
+                                            selectedItem = link
+                                            Toast
+                                                .makeText(
+                                                    activity,
+                                                    "Long Click",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                        }
+                                    )
+                                    .height(50.dp)
+                                    .graphicsLayer {
+                                        // Apply alpha based on whether the item is selected
+                                        alpha =
+                                            if (selectedItem == null || selectedItem == link) 1f else 0.3f
+                                    },
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
@@ -209,6 +291,90 @@ fun SearchFragment(
             }
 
         }
+    }
 
+    selectedItem?.let { selected ->
+
+        Dialog(
+            onDismissRequest = { selectedItem = null }
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.inversePrimary)
+                            .fillMaxWidth(.9f)
+                            .height(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = selected, style = MaterialTheme.typography.headlineLarge, color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Box(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.inversePrimary)
+                        .fillMaxWidth(.9f)
+                        .height(70.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Row(
+                        modifier = Modifier.fillMaxSize(.9f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                        }
+
+                        IconButton(onClick = { removeCurrentLinkTrigger++ }) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                        }
+
+                        IconButton(onClick = { selectedItem = null; showUserLinksTrigger++ }) {
+                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                        }
+
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button(onClick = { /* Do action 1 */ }) {
+                        Text(text = "Delete")
+                    }
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(onClick = { /* Do action 2 */ }) {
+                        Text(text = "Action 2")
+                    }
+
+                }
+
+                Button(onClick = { selectedItem = null; showUserLinksTrigger++ }) {
+                    Text(text = "Close")
+                }
+            }
+
+        }
     }
 }
+
+
+
