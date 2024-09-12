@@ -3,7 +3,8 @@ package com.broken.link.buster.data._const
 const val TAG = "tag"
 
 const val COLLECTION_PATH = "link"
-const val COLLECTION_FIELD = "links"
+const val COLLECTION_FIELD_LINKS = "links"
+const val COLLECTION_FILED_GROUP = "group"
 
 enum class UserStatusSignIn {
     GUEST, GOOGLE, DEVELOPER, GUEST_NO_FILLING

@@ -3,7 +3,6 @@ package com.broken.link.buster
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,12 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.broken.link.buster.data.BrokenLinkModel
-import com.broken.link.buster.data._const.COLLECTION_FIELD
+import com.broken.link.buster.data._const.COLLECTION_FIELD_LINKS
+import com.broken.link.buster.data._const.COLLECTION_FILED_GROUP
 import com.broken.link.buster.data._const.COLLECTION_PATH
 import com.broken.link.buster.data._const.SHARED_USER_STATUS_NAME
-import com.broken.link.buster.data._const.TAG
-import com.broken.link.buster.data._const.USER_GOOGLE_LINK_TO_DATA
 import com.broken.link.buster.data._const.USER_STATUS_SHARED_NAME
 import com.broken.link.buster.data._const.UserStatusSignIn
 import com.broken.link.buster.data._const.getUserStatusSignInToInt
@@ -34,9 +31,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import io.realm.kotlin.Realm
-import okhttp3.internal.userAgent
 
 class MainActivity : ComponentActivity() {
 
@@ -100,7 +95,7 @@ class MainActivity : ComponentActivity() {
             .get()
             .addOnSuccessListener {  documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    val links = documentSnapshot.get(COLLECTION_FIELD) as? List<String>
+                    val links = documentSnapshot.get(COLLECTION_FIELD_LINKS) as? List<String>
 
                     if (links != null) {
                         onSuccess(links)
@@ -128,14 +123,14 @@ class MainActivity : ComponentActivity() {
         userDocRef
             .get()
             .addOnSuccessListener { documentSnapshot ->
-                val links = documentSnapshot.get(COLLECTION_FIELD) as? MutableList<String>
+                val links = documentSnapshot.get(COLLECTION_FIELD_LINKS) as? MutableList<String>
 
                 links?.let {
                     if (it.contains(link)) {
                         it.remove(link)
 
                         userDocRef
-                            .update(COLLECTION_FIELD, it)
+                            .update(COLLECTION_FIELD_LINKS, it)
                             .addOnSuccessListener { onSuccess() }
                             .addOnFailureListener { onError("Cannot Update (1)") }
                     } else {
@@ -172,7 +167,7 @@ class MainActivity : ComponentActivity() {
 
         firestore.collection(COLLECTION_PATH)
             .document(userId)
-            .set(hashMapOf(COLLECTION_FIELD to listOf(data)))
+            .set(hashMapOf(COLLECTION_FIELD_LINKS to listOf(data)))
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener {  }
     }
@@ -184,7 +179,7 @@ class MainActivity : ComponentActivity() {
         onError: () -> Unit,
     ) {
         val userId = auth.currentUser?.uid ?: return
-        val data = hashMapOf(COLLECTION_FIELD to listOf(url))
+        val data = hashMapOf(COLLECTION_FIELD_LINKS to listOf(url))
 
 
         firestore.collection(COLLECTION_PATH)
@@ -205,7 +200,7 @@ class MainActivity : ComponentActivity() {
                 } else {
 
                     firestore.collection(COLLECTION_PATH).document(userId)
-                        .update(COLLECTION_FIELD, FieldValue.arrayUnion(url))
+                        .update(COLLECTION_FIELD_LINKS, FieldValue.arrayUnion(url))
                         .addOnSuccessListener {
                             Toast.makeText(this, "Links success add", Toast.LENGTH_SHORT).show()
                             onSuccess()
@@ -231,6 +226,50 @@ class MainActivity : ComponentActivity() {
 
             }
 
+    }
+
+
+    fun getUserFolder(
+        onSuccess: (List<HashMap<String, List<String>>>) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val firestoreDoc = firestore.collection(COLLECTION_PATH).document(userId)
+
+        firestoreDoc
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (!documentSnapshot.exists()) {
+                    onError("documentSnapshot does not exist")
+                }
+
+                val folders = documentSnapshot.get(COLLECTION_FILED_GROUP) as? List<HashMap<String, List<String>>> // 1 - создает пространство всех папок; 2 - создает саму папку, где 1 - это название папки, 2 - данные папки
+
+                if (folders == null) {
+                    onError("Folder does not exist")
+                }
+
+                onSuccess(folders!!)
+            }
+            .addOnFailureListener {
+                onError("getUserFolder addOnFailureListener")
+            }
+    }
+
+    fun createUserFolder(
+        name: String,
+        links: List<String>,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        val userId = auth.currentUser?.uid ?: return
+        val firestoreDoc = firestore.collection(COLLECTION_PATH).document(userId)
+
+        val data = hashMapOf(COLLECTION_FILED_GROUP to listOf(hashMapOf(name to links)))
+        firestoreDoc
+            .set(data)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onError("Cannot create DB") }
     }
 
 

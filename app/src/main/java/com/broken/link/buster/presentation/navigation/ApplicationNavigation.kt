@@ -24,7 +24,7 @@ fun ApplicationNavigation(activity: MainActivity) {
         this.composable(
             route = Screen.FolderScreen.route,
         ) {
-            FolderFragment(navController = navController)
+            FolderFragment(navController = navController, activity = activity)
         }
 
         this.composable(
