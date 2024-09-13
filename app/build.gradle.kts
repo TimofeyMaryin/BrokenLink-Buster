@@ -88,4 +88,7 @@ dependencies {
 
     // Realm
     api(libs.realm)
+
+    // constraintlayout
+    implementation(libs.constraintlayout)
 }

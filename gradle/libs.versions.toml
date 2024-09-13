@@ -49,6 +49,7 @@ realm = { group = "io.realm.kotlin", name = "library-base", version = "1.11.0" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.0.1"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

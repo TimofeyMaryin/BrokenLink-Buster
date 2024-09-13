@@ -46,20 +46,6 @@ fun FragmentContainer(
 }
 
 
-@Composable
-fun ColumnScope.Container(
-    weight: Float,
-    content: @Composable () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .weight(weight),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
-    }
-}
 
 @Composable
 private fun ColumnScope.BottomBar(
@@ -115,18 +101,3 @@ private fun RowScope.BottomBarButton(
     
 }
 
-
-@Composable
-fun RowScope.Container(
-    weight: Float,
-    content: @Composable () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .weight(weight),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
-    }
-}

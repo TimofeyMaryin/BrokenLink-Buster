@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import io.realm.kotlin.Realm
+import java.lang.reflect.Field
 
 class MainActivity : ComponentActivity() {
 
@@ -263,13 +264,30 @@ class MainActivity : ComponentActivity() {
         onError: (String) -> Unit,
     ) {
         val userId = auth.currentUser?.uid ?: return
-        val firestoreDoc = firestore.collection(COLLECTION_PATH).document(userId)
+        val firestoreDoc = firestore.collection(COLLECTION_PATH)
 
         val data = hashMapOf(COLLECTION_FILED_GROUP to listOf(hashMapOf(name to links)))
         firestoreDoc
-            .set(data)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { onError("Cannot create DB") }
+            .get()
+            .addOnSuccessListener { querySnap ->
+                if (querySnap.isEmpty) {
+                    firestoreDoc.document(userId)
+                        .set(data)
+                        .addOnSuccessListener { onSuccess.invoke() }
+                        .addOnFailureListener { onError.invoke("Cannot Create Empry Folder") }
+                } else {
+                    firestoreDoc.document(userId)
+                        .update(COLLECTION_FILED_GROUP, FieldValue.arrayUnion(hashMapOf(name to links)))
+                        .addOnSuccessListener { onSuccess.invoke() }
+                        .addOnFailureListener { onError.invoke("Cannot update Folder") }
+                }
+            }
+            .addOnFailureListener {
+                firestoreDoc.document(userId)
+                    .set(data)
+                    .addOnSuccessListener { onSuccess.invoke() }
+                    .addOnFailureListener { onError.invoke("Cannot Set data") }
+            }
     }
 
 
