@@ -28,11 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,12 +60,14 @@ import com.broken.link.buster.presentation.UI_element.Container
 import com.broken.link.buster.presentation.UI_element.FolderInfoModel
 import com.broken.link.buster.presentation.UI_element.FolderItem
 import com.broken.link.buster.presentation.UI_element.FragmentContainer
-import com.google.firebase.firestore.auth.User
+import com.broken.link.buster.presentation.navigation.Screen
+import com.broken.link.buster.presentation.vms.UserClientViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderFragment(
     activity: MainActivity,
+    viewModel: UserClientViewModel,
     navController: NavController,
 ) {
     val infiniteTransition = rememberInfiniteTransition()
@@ -225,6 +224,10 @@ fun FolderFragment(
                         ) {
                             this.items(items = allFolders) { folder ->
                                 FolderItem(name = folder.name, links = folder.links) {
+
+                                    viewModel.setCurrentFolderValue(folder)
+                                    navController.navigate(Screen.ShowCurrentFolderScreen.route)
+
                                     Toast.makeText(activity, "YAP!", Toast.LENGTH_SHORT).show()
                                 }
                             }
@@ -249,66 +252,6 @@ fun FolderFragment(
                 Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White)
             }
         }
-
-//        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-//            Box(modifier = Modifier.fillMaxSize(.9f), contentAlignment = Alignment.BottomCenter) {
-//                Box(
-//                    modifier = Modifier
-//                        .clip(CircleShape)
-//                        .size(50.dp)
-//                        .background(Color.Blue)
-//                        .clickable {
-//                            isShowForm = true
-//
-//                            // getAllLinksTriggers++
-//                        },
-//                    contentAlignment = Alignment.Center,
-//                ) {
-//                    Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White)
-//                }
-//            }
-//        }
-//
-//        if (isLoad) {
-//            CircularProgressIndicator(progress = { progress })
-//        } else {
-//
-//            LazyColumn {
-//
-//                stickyHeader {
-//                    Row(
-//                        modifier = Modifier.fillParentMaxWidth(.9f),
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        Text(text = "Всего ссылок: ${userLink.size}")
-//
-//                        Row(
-//                            verticalAlignment = Alignment.CenterVertically,
-//                        ) {
-//
-//                            IconButton(onClick = { getAllLinksTriggers++}) {
-//                                Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-//                            }
-//
-//                            IconButton(onClick = { createUserFolderTrigger++}) {
-//                                Icon(imageVector = Icons.Default.Create, contentDescription = null)
-//                            }
-//
-//                        }
-//                    }
-//                }
-//
-//                this.items(userLink) { link ->
-//                    Text(text = link, modifier = Modifier
-//                        .fillParentMaxWidth()
-//                        .background(Color.Red.copy(.2f))
-//                        .padding(vertical = 20.dp))
-//                }
-//
-//            }
-//        }
-
     }
 
     if (isShowForm) {

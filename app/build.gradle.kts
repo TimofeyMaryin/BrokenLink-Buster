@@ -91,4 +91,8 @@ dependencies {
 
     // constraintlayout
     implementation(libs.constraintlayout)
+
+    // retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 }

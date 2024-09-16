@@ -1,5 +1,7 @@
 package com.broken.link.buster.data._const
 
+import android.webkit.URLUtil
+
 const val TAG = "tag"
 
 const val COLLECTION_PATH = "link"
@@ -19,3 +21,6 @@ fun getUserStatusSignInToInt(status: UserStatusSignIn?) : Int {
         null -> -1
     }
 }
+
+
+fun isUrlValid(url: String): Boolean = URLUtil.isValidUrl(url)

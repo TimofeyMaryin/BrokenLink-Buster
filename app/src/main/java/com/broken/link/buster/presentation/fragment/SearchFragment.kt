@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
@@ -55,6 +57,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.broken.link.buster.MainActivity
 import com.broken.link.buster.data._const.TAG
+import com.broken.link.buster.data._const.isUrlValid
 import com.broken.link.buster.presentation.UI_element.FragmentContainer
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -65,6 +68,7 @@ fun SearchFragment(
 ) {
     var userLinks = remember { mutableListOf<String>() }
     var userLink by remember { mutableStateOf("") }
+    val alphaChannelForActionButton by animateFloatAsState(targetValue = if (isUrlValid(userLink)) 1f else 0.1f)
 
     var saveUserLinksTrigger by remember { mutableIntStateOf(0) }
     var showUserLinksTrigger by remember { mutableIntStateOf(0) }
@@ -205,28 +209,46 @@ fun SearchFragment(
                 value = userLink,
                 onValueChange = { userLink = it },
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) }
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                isError = !isUrlValid(userLink),
+                maxLines = 1,
+                singleLine = true,
+                trailingIcon = {
+                    if (isUrlValid(userLink)) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Log.e(TAG, "SearchFragment: ", )
+                    }
+                }
             )
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                IconButton(onClick = { saveUserLinksTrigger++ }) {
-                    Icon(imageVector = Icons.Default.Warning, contentDescription = null)
+                IconButton(
+                    onClick = {
+                        saveUserLinksTrigger++
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.primary.copy(alphaChannelForActionButton))
                 }
 
                 IconButton(onClick = { saveUserLinksTrigger++ }) {
-                    Icon(imageVector = Icons.Default.Create, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Create, contentDescription = null, tint = MaterialTheme.colorScheme.primary.copy(alphaChannelForActionButton))
                 }
 
                 IconButton(onClick = { showUserLinksTrigger++ }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary.copy(alphaChannelForActionButton))
                 }
 
                 IconButton(onClick = { removeUserDataBaseTrigger++ }) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.primary.copy(alphaChannelForActionButton))
                 }
 
             }
